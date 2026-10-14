@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Local AI Chat & Benchmark</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- แถบด้านข้าง: ตั้งค่าและเลือกโมเดล -->
+        <div class="sidebar">
+            <h2>⚙️ Control Panel</h2>
+            <div class="control-group">
+                <label>เลือกโมเดล:</label>
+                <select id="model-select">
+                    <option value="hermes3">hermes3</option>
+                    <option value="qwen2.5:3b">qwen2.5:3b</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>ตัวอย่างคำถาม:</label>
+                <div class="quick-prompts">
+                    <button onclick="setPrompt('แนะนำตัวเป็นภาษาไทยสั้นๆ 1 ประโยค')">แนะนำตัวสั้นๆ</button>
+                    <button onclick="setPrompt('เมืองหลวงของประเทศไทยคืออะไร')">เมืองหลวงไทย</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- พื้นที่หลัก: ช่องแชท -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>🤖 Local AI Agent (Offline Mode)</h2>
+                <span id="status-badge" class="badge online">🟢 พร้อมใช้งาน</span>
+            </div>
+
+            <div id="chat-box"></div>
+
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="พิมพ์ข้อความที่นี่..."
+                    onkeydown="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">ส่งข้อความ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
