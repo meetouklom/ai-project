@@ -6,7 +6,7 @@
 ![Frontend](https://img.shields.io/badge/Frontend-HTML%20%7C%20CSS%20%7C%20JavaScript-E34F26?logo=html5&logoColor=white)
 ![Inference](https://img.shields.io/badge/Inference-Local%20Ollama-2E8B57)
 
-A lightweight browser chat interface for **Ollama running on your machine**. Send text, attach documents or images, and see the model response time. A separate Python script compares the response times of two text models using one fixed summarization prompt.
+A lightweight browser chat interface for **Ollama running on your machine**. Send text, attach documents or images, and ask for a concise summary with either a simple explanation or an ER diagram in one model response. A separate Python script measures one fixed summarization request to Hermes 3.
 
 The chat page is a static HTML/CSS/JavaScript app. It sends requests **directly from the browser to Ollama**; this project does not include a backend, API proxy, database, or hosted AI service. Docker Compose runs Ollama only—the website is served separately.
 
@@ -22,19 +22,20 @@ The chat page is a static HTML/CSS/JavaScript app. It sends requests **directly 
   - [Optional: Serve the Website with Nginx](#optional-serve-the-website-with-nginx)
 - [Using the Website](#using-the-website)
 - [Supported Attachments](#supported-attachments)
-- [Benchmark Script](#benchmark-script)
+- [Response-Time Sample](#response-time-sample)
 - [Privacy & Limitations](#privacy--limitations)
 - [Troubleshooting](#troubleshooting)
 
 ## Overview & Key Highlights
 
 - **Local model inference:** The browser sends requests to the Ollama API at `http://localhost:11434/api/chat`.
-- **Three selectable models:** `hermes3`, `qwen2.5:3b`, and `llava` (vision).
+- **Single-model summaries:** Hermes 3 summarizes and explains text or creates a Mermaid ER diagram in one request.
+- **Optional image model:** LLaVA can handle image attachments.
 - **File attachments:** Attach up to five supported files, with a 10 MB limit per file.
 - **Light and dark themes:** The selected theme and interface language are saved in browser local storage.
 - **Thai and English interface:** Switch the UI language from the sidebar.
 - **Response timing:** The chat displays the elapsed time for each completed Ollama request.
-- **Separate benchmark:** `app.py` tests `hermes3` and `qwen2.5:3b` with the same fixed summarization prompt.
+- **Separate timing sample:** `app.py` sends one fixed summarization prompt to `hermes3`.
 
 ## System Architecture
 
@@ -48,8 +49,8 @@ The chat page is a static HTML/CSS/JavaScript app. It sends requests **directly 
 |             |                                       | Serves web files only|  |
 |             |                                       +----------------------+  |
 |             |                                                                 |
-|             | POST /api/chat (direct request)                                 |
-|             | Current message + extracted document text + images              |
+|             | POST /api/chat (one direct request)                              |
+|             | Current message + extracted document text + images               |
 |             v                                                                 |
 |  +-------------------------------+                                            |
 |  | Ollama API :11434             |                                            |
@@ -60,10 +61,10 @@ The chat page is a static HTML/CSS/JavaScript app. It sends requests **directly 
 |                  v                                                            |
 |  +-----------------------------------------------+                            |
 |  | Models installed in Ollama                   |                            |
-|  | hermes3 / qwen2.5:3b / llava (for images)    |                            |
+|  | hermes3 / llava (optional, for images)       |                            |
 |  +-----------------------------------------------+                            |
 |                                                                               |
-|  app.py (separate benchmark) ── POST /api/chat ──> Ollama API                |
+|  app.py (separate timing sample) ── POST /api/chat ──> Ollama API            |
 |                                                                               |
 +-------------------------------------------------------------------------------+
 
@@ -75,9 +76,9 @@ until they are sent directly to the local Ollama API.
 ### Request flow
 
 1. The browser loads the static website from Python's built-in HTTP server or Nginx.
-2. When you send a message, the browser calls Ollama directly. The static web server does not handle AI requests.
-3. Ollama runs the selected model and returns its response to the browser.
-4. `app.py` is an independent command-line benchmark; it also calls Ollama directly.
+2. For each request, the browser sends the source to the selected model through Ollama. The static web server does not handle AI requests.
+3. Hermes 3 summarizes the source and produces the selected format in one response. LLaVA can be selected instead when processing images.
+4. `app.py` is an independent command-line timing sample; it also calls Ollama directly.
 
 ## Repository Structure
 
@@ -86,7 +87,7 @@ until they are sent directly to the local Ollama API.
 | `index.html` | Chat layout, model selector, attachment controls, and settings |
 | `style.css` | Responsive layout, themes, and component styling |
 | `script.js` | Language/theme preferences, file extraction, and direct Ollama API requests |
-| `app.py` | One-shot response-time comparison for `hermes3` and `qwen2.5:3b` |
+| `app.py` | One-request response-time sample for `hermes3` |
 | `docker-compose.yml` | Ollama container, API port, allowed browser origins, and model volume |
 | `Dockerfile` | Optional Nginx image for serving the static website only |
 
@@ -94,11 +95,10 @@ until they are sent directly to the local Ollama API.
 
 | Model | Ollama name | Use |
 | --- | --- | --- |
-| Hermes 3 | `hermes3` | Text chat |
-| Qwen 2.5 3B | `qwen2.5:3b` | Text chat |
-| LLaVA | `llava` | Image understanding; select it before sending image attachments |
+| Hermes 3 | `hermes3` | Text and document summaries, simple explanations, or ER diagrams |
+| LLaVA | `llava` | Optional image understanding; select it when attaching images |
 
-Download only the models you plan to use. LLaVA is needed only for images.
+Install Hermes 3 for text and document summarization. LLaVA is optional and needed only for images.
 
 ## Quick Start
 
@@ -112,7 +112,6 @@ Open PowerShell in a terminal where Ollama is installed:
 
 ```powershell
 ollama pull hermes3
-ollama pull qwen2.5:3b
 ollama pull llava
 ```
 
@@ -152,7 +151,6 @@ Docker Compose runs **only Ollama**, publishes its API on port `11434`, and stor
 cd "C:\Users\User\OneDrive\Desktop\ai-project-main"
 docker compose up -d
 docker compose exec ollama ollama pull hermes3
-docker compose exec ollama ollama pull qwen2.5:3b
 docker compose exec ollama ollama pull llava
 ```
 
@@ -180,12 +178,15 @@ Open [http://localhost:8080](http://localhost:8080). Make sure Ollama allows the
 
 ## Using the Website
 
-- **Choose a model:** Select an installed model in the sidebar.
+- **Choose a model:** Hermes 3 handles text and documents. Choose LLaVA when sending images.
+- **Choose a response format:** Select **Explain in simple language** or **Create an ER diagram**. The selected model creates the summary and requested format in one response.
 - **Send a message:** Type into the input field and press **Send** or Enter.
 - **Use a summary example:** Click a summary prompt to place its text into the input field. These examples do not restrict the model.
 - **Attach files:** Click **＋** or drag files onto the message input. Remove an attachment using its **×** button.
 - **Change language or theme:** Use the controls in the sidebar. Preferences are saved in the current browser.
-- **Check response time:** The completed model response includes the elapsed request time.
+- **Check response time:** Each response includes the elapsed time for its single Ollama request.
+
+An ER diagram is generated as Mermaid `erDiagram` text with an explanation. If the source does not support identifiable entities and relationships, the model is instructed to say so rather than inventing a diagram.
 
 ## Supported Attachments
 
@@ -202,23 +203,23 @@ PDF.js, its PDF worker, and Mammoth are loaded from cdnjs when needed. PDF/DOCX 
 
 Scanned or image-only PDFs are not OCR-processed and may produce no extracted text. Image attachments require the `llava` model to be installed and selected in the model selector.
 
-## Benchmark Script
+## Response-Time Sample
 
-Run the separate benchmark with Python 3 while Ollama is running and both text models are installed:
+Run the separate response-time sample with Python 3 while Ollama is running and `hermes3` is installed:
 
 ```powershell
 python app.py
 ```
 
-`app.py` sends the same fixed Thai summarization prompt once to `hermes3` and once to `qwen2.5:3b`. It prints both responses, the elapsed time for each request, and which request was faster in that run. The timer measures the full HTTP round trip, including model inference. It is a simple comparison, not a controlled performance test.
+`app.py` sends one fixed Thai summarization prompt to `hermes3` and prints the response and elapsed HTTP round-trip time, including model inference. It is a single timing sample, not a controlled performance test.
 
-The summarization instruction in `test_prompt` applies only to those benchmark requests. It does not fine-tune either model, persist as a model setting, or change the website's chat behavior.
+The summarization instruction in `test_prompt` applies only to that timing-sample request. It does not fine-tune Hermes 3, persist as a model setting, or change the website's chat behavior.
 
 ## Privacy & Limitations
 
 - The browser sends the current message and attachments directly to the local Ollama API. This project does not call a hosted AI service.
 - Previous chat messages remain visible in the page, but are **not** sent as conversation history with later requests.
-- Each web request includes a system prompt that instructs the model to summarize provided source material, ask for a document when none is provided, avoid inventing facts, and ignore instructions embedded in source files.
+- Each web request goes to one selected model. Hermes 3 handles text and documents; image attachments require selecting the installed `llava` model.
 - The summary buttons insert example user text; the system prompt guides the model but is not a hard technical restriction or a guarantee that every model will follow it.
 - PDF/DOCX parsing libraries are fetched from cdnjs; the document contents are not.
 - The status badge describes the direct Ollama connection mode; it is not a live health check.
@@ -250,4 +251,4 @@ Connect to the internet so the browser can load PDF.js or Mammoth. Check the fil
 
 ### `python app.py` shows a connection error
 
-Start Ollama, check [http://localhost:11434/api/tags](http://localhost:11434/api/tags), and verify that both `hermes3` and `qwen2.5:3b` are installed.
+Start Ollama, check [http://localhost:11434/api/tags](http://localhost:11434/api/tags), and verify that `hermes3` is installed.
