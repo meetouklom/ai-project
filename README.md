@@ -1,4 +1,4 @@
-# Local AI Studio
+เ# Local AI Studio
 
 A small browser-based chat interface for Ollama, with local document and image attachments, plus a separate Python script for comparing two models on a fixed summarization example.
 
