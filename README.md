@@ -38,25 +38,38 @@ The chat page is a static HTML/CSS/JavaScript app. It sends requests **directly 
 
 ## System Architecture
 
-```mermaid
-flowchart TB
-    subgraph host["Your Computer"]
-        browser["Browser<br/>Chat UI and file selection"]
-        web["Static Web Server<br/>Python http.server or Nginx<br/>Serves HTML / CSS / JavaScript only"]
-        ollama["Ollama API :11434<br/>Windows app or Docker container"]
-        models[("Installed Ollama models<br/>hermes3 / qwen2.5:3b / llava")]
-        benchmark["app.py<br/>Separate benchmark script"]
-        volume[("Docker volume: ollama_data<br/>Persists models when using Compose")]
+```text
++------------------------------- YOUR COMPUTER --------------------------------+
+|                                                                               |
+|  +----------------------+       Loads website       +----------------------+  |
+|  | Browser              | <------------------------ | Static Web Server    |  |
+|  | Chat UI and files    |                           | Python http.server   |  |
+|  +----------+-----------+                           | or Nginx             |  |
+|             |                                       | Serves web files only|  |
+|             |                                       +----------------------+  |
+|             |                                                                 |
+|             | POST /api/chat (direct request)                                 |
+|             | Current message + extracted document text + images              |
+|             v                                                                 |
+|  +-------------------------------+                                            |
+|  | Ollama API :11434             |                                            |
+|  | Windows app or Docker service |                                            |
+|  +---------------+---------------+                                            |
+|                  |                                                            |
+|                  | Runs the selected model                                    |
+|                  v                                                            |
+|  +-----------------------------------------------+                            |
+|  | Models installed in Ollama                   |                            |
+|  | hermes3 / qwen2.5:3b / llava (for images)    |                            |
+|  +-----------------------------------------------+                            |
+|                                                                               |
+|  app.py (separate benchmark) ── POST /api/chat ──> Ollama API                |
+|                                                                               |
++-------------------------------------------------------------------------------+
 
-        browser <-->|"Loads website files"| web
-        browser -->|"POST /api/chat directly<br/>Current message and attachments"| ollama
-        ollama -->|"Runs selected model"| models
-        benchmark -->|"POST /api/chat"| ollama
-        models -.->|"Stored here with Docker Compose"| volume
-    end
-
-    cdn["cdnjs<br/>PDF.js / Mammoth"]
-    browser -.->|"Loads document-reader libraries only"| cdn
+PDF.js / Mammoth are downloaded from cdnjs when needed to read PDF/DOCX files.
+Only the parser libraries are downloaded; document contents stay in the browser
+until they are sent directly to the local Ollama API.
 ```
 
 ### Request flow
