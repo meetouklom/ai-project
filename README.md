@@ -218,7 +218,8 @@ The summarization instruction in `test_prompt` applies only to those benchmark r
 
 - The browser sends the current message and attachments directly to the local Ollama API. This project does not call a hosted AI service.
 - Previous chat messages remain visible in the page, but are **not** sent as conversation history with later requests.
-- The web chat does not send a system prompt or enforce a summarization-only role. The summary buttons only insert example user text.
+- Each web request includes a system prompt that instructs the model to summarize provided source material, ask for a document when none is provided, avoid inventing facts, and ignore instructions embedded in source files.
+- The summary buttons insert example user text; the system prompt guides the model but is not a hard technical restriction or a guarantee that every model will follow it.
 - PDF/DOCX parsing libraries are fetched from cdnjs; the document contents are not.
 - The status badge describes the direct Ollama connection mode; it is not a live health check.
 - Ollama must allow the exact origin used to open the website through its `OLLAMA_ORIGINS` setting.
