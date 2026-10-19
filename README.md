@@ -6,7 +6,7 @@
 ![Frontend](https://img.shields.io/badge/Frontend-HTML%20%7C%20CSS%20%7C%20JavaScript-E34F26?logo=html5&logoColor=white)
 ![Inference](https://img.shields.io/badge/Inference-Local%20Ollama-2E8B57)
 
-A lightweight browser chat interface for **Ollama running on your machine**. Send text, attach documents or images, and ask for a concise summary with either a simple explanation or an ER diagram in one model response. A separate Python script measures one fixed summarization request to Hermes 3.
+A lightweight browser chat interface for **Ollama running on your machine**. Ask general questions, send text, attach documents or images, and choose a general response, a simple explanation, or an ER diagram. A separate Python script measures one fixed summarization request to Hermes 3.
 
 The chat page is a static HTML/CSS/JavaScript app. It sends requests **directly from the browser to Ollama**; this project does not include a backend, API proxy, database, or hosted AI service. Docker Compose runs Ollama only—the website is served separately.
 
@@ -29,7 +29,7 @@ The chat page is a static HTML/CSS/JavaScript app. It sends requests **directly 
 ## Overview & Key Highlights
 
 - **Local model inference:** The browser sends requests to the Ollama API at `http://localhost:11434/api/chat`.
-- **Single-model summaries:** Hermes 3 summarizes and explains text or creates a Mermaid ER diagram in one request.
+- **Flexible responses:** Hermes 3 answers general questions, summarizes and explains text, or creates a Mermaid ER diagram in one request.
 - **Optional image model:** LLaVA can handle image attachments.
 - **File attachments:** Attach up to five supported files, with a 10 MB limit per file.
 - **Light and dark themes:** The selected theme and interface language are saved in browser local storage.
@@ -179,7 +179,7 @@ Open [http://localhost:8080](http://localhost:8080). Make sure Ollama allows the
 ## Using the Website
 
 - **Choose a model:** Hermes 3 handles text and documents. Choose LLaVA when sending images.
-- **Choose a response format:** Select **Explain in simple language** or **Create an ER diagram**. The selected model creates the summary and requested format in one response.
+- **Choose a response format:** Select **General**, **Explain in simple language**, or **Create an ER diagram**. General mode answers requests without forcing a summary; the other formats summarize the source in the requested style.
 - **Send a message:** Type into the input field and press **Send** or Enter.
 - **Use a summary example:** Click a summary prompt to place its text into the input field. These examples do not restrict the model.
 - **Attach files:** Click **＋** or drag files onto the message input. Remove an attachment using its **×** button.
